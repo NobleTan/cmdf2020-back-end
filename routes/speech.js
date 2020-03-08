@@ -20,56 +20,41 @@ const ignore = ['to', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'from', 'abou
 router.get('/', function(req, res, next) {
   speechToText().then(transcript => {
     res.send(transcript);
-    client.connect().then(()=> {
-      let userCheck = `SELECT * FROM account WHERE username = '${body.username}';`;
-      client.query(userCheck, (error, dbres) => {
-        if (result.rows.length > 0) {
-          res.json('pages/home', { 'props': { regFailed: true } });
-          return;
-        }
-        var getUsersQuery = `INSERT INTO account (text) VALUES ('${body.text}');`;
-        console.log(getUsersQuery);
-        client.query(getUsersQuery, (error, dbres) => {
-          if (error) {
-            res.send("error");
-            console.log(error);
-          }
-        });
-        console.log("passed User Query\n");
-        client.query(getStatsQuery, (error, dbres) => {
-          if (error) {
-            res.send("error");
-            console.log(error);
-          }
-        });
-        res.json(dbres.rows[0]);
-   
-    })
-  })
-  }).catch(console.error);
+    console.log("test");
+    databaseclient.connect().then(()=> {
+    console.log("hello")
+    databaseclient.connect().then(()=> {
+      client.query("SELECT * FROM account;", (err, dbres) => {
+        console.log(err)
+        console.log(dbres)
+        res.json(dbres.rows[0])             
+      })
+    });
+  });
+});
 });
 
 router.get('/mostFrequent', function(req, res, next) {
   speechToText().then(transcript => {
     let mostFrequent = getMostFrequent(transcript);
     res.send(mostFrequent);
-    client.connect().then(()=> {
+  databaseclient.connect().then(()=> {
       let userCheck = `SELECT * FROM account WHERE username = '${body.username}';`;
-      client.query(userCheck, (error, dbres) => {
+    databaseclient.query(userCheck, (error, dbres) => {
         if (result.rows.length > 0) {
           res.json('pages/results', { 'props': { failed: true } });
           return;
         }
         var getUsersQuery = `INSERT INTO account (common1, common2, common3) VALUES ('${body.getMostFrequent[0]}','${body.getMostFrequent[1]}','${body.getMostFrequent[3]}');`;
         console.log(getUsersQuery);
-        client.query(getUsersQuery, (error, result) => {
+      databaseclient.query(getUsersQuery, (error, result) => {
           if (error) {
             res.send("error");
             console.log(error);
           }
         });
         console.log("passed User Query\n");
-        client.query(getStatsQuery, (error, result) => {
+      databaseclient.query(getStatsQuery, (error, result) => {
           if (error) {
             res.send("error");
             console.log(error);
@@ -86,23 +71,23 @@ router.get('/filler', function(req, res, next) {
   speechToText().then(transcript => {
     let fillerMap = wordCount(transcript, true);
     // sort and output top three
-    client.connect().then(()=> {
+  databaseclient.connect().then(()=> {
       let userCheck = `SELECT * FROM account WHERE username = '${body.username}';`;
-      client.query(userCheck, (error, dbres) => {
+    databaseclient.query(userCheck, (error, dbres) => {
         if (result.rows.length > 0) {
           res.json('pages/results', { 'props': { failed: true } });
           return;
         }
         var getUsersQuery = `INSERT INTO account (filler1, filler2, filler3) VALUES ('${body.fillerMap[0]}','${body.fillerMap[1]}','${body.fillerMap[3]}');`;
         console.log(getUsersQuery);
-        client.query(getUsersQuery, (error, result) => {
+      databaseclient.query(getUsersQuery, (error, result) => {
           if (error) {
             res.send("error");
             console.log(error);
           }
         });
         console.log("passed User Query\n");
-        client.query(getStatsQuery, (error, result) => {
+      databaseclient.query(getStatsQuery, (error, result) => {
           if (error) {
             res.send("error");
             console.log(error);
@@ -110,8 +95,8 @@ router.get('/filler', function(req, res, next) {
         });
         res.json("pages/results", { props: { 'filler': true } });
    
+      })
     })
-  })
     res.send(fillerMap);
   }).catch(console.error);
 })
@@ -123,23 +108,23 @@ router.get('/wpm', function(req, res, next) {
     getAudioDurationInSeconds(file).then((seconds) => {
       const totalWords = transcript.split(' ').length;
       const wpm = totalWords/(seconds/60);
-      client.connect().then(()=> {
+    databaseclient.connect().then(()=> {
         let userCheck = `SELECT * FROM account WHERE username = '${body.username}';`;
-        client.query(userCheck, (error, dbres) => {
+      databaseclient.query(userCheck, (error, dbres) => {
           if (result.rows.length > 0) {
             res.json('pages/results', { 'props': { failed: true } });
             return;
           }
           var getUsersQuery = `INSERT INTO account (words) VALUES ('${body.wps}');`;
           console.log(getUsersQuery);
-          client.query(getUsersQuery, (error, result) => {
+        databaseclient.query(getUsersQuery, (error, result) => {
             if (error) {
               res.send("error");
               console.log(error);
             }
           });
           console.log("passed User Query\n");
-          client.query(getStatsQuery, (error, result) => {
+        databaseclient.query(getStatsQuery, (error, result) => {
             if (error) {
               res.send("error");
               console.log(error);
@@ -149,7 +134,7 @@ router.get('/wpm', function(req, res, next) {
      
       })
   })
-      res.send(wpm.toString());
+      res.json(wpm.toString());
     }).catch(console.error);
   })
 });
@@ -159,23 +144,23 @@ router.get('/duration', function(req, res, next) {
   const file = req.body.file;
   getAudioDurationInSeconds(file).then((duration) => {
     const timeduration = Math.ceil(duration).toString()
-    client.connect().then(()=> {
+  databaseclient.connect().then(()=> {
       let userCheck = `SELECT * FROM account WHERE username = '${body.username}';`;
-      client.query(userCheck, (error, dbres) => {
+    databaseclient.query(userCheck, (error, dbres) => {
         if (result.rows.length > 0) {
           res.json('pages/results', { 'props': { failed: true } });
           return;
         }
         var getUsersQuery = `INSERT INTO account (time) VALUES ('${body.timeduration}');`;
         console.log(getUsersQuery);
-        client.query(getUsersQuery, (error, result) => {
+      databaseclient.query(getUsersQuery, (error, result) => {
           if (error) {
             res.send("error");
             console.log(error);
           }
         });
         console.log("passed User Query\n");
-        client.query(getStatsQuery, (error, result) => {
+      databaseclient.query(getStatsQuery, (error, result) => {
           if (error) {
             res.send("error");
             console.log(error);
@@ -185,7 +170,7 @@ router.get('/duration', function(req, res, next) {
    
     })
   })
-    res.send(Math.ceil(duration).toString());
+    res.json(Math.ceil(duration).toString());
   }).catch(console.error);
 });
 
@@ -214,7 +199,7 @@ router.get('/complex', function(req, res, next) {
 });
 
 async function speechToText() {
-  // Imports the Google Cloud client library
+  // Imports the Google Clouddatabaseclient library
   const speech = require('@google-cloud/speech');
   const fs = require('fs');
 

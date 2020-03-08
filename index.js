@@ -2,7 +2,6 @@ var createError = require('http-errors');
 const express = require("express");
 const app = express();
 var path = require('path');
-var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const PORT = process.env.PORT || 3000
