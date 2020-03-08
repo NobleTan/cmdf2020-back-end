@@ -6,6 +6,9 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const PORT = process.env.PORT || 3000
+
+
+
 const {Client} = require("pg");
 const client = new Client({
     host:process.env.PGHOST,
@@ -43,18 +46,18 @@ app.use(function(err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
+  // json the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.json('error');
 });
 
-app.get("/", (req, res) => {
+app.get("/", (req, res) => {    
     console.log("hello")
     client.connect().then(()=> {
         client.query("SELECT * FROM account;", (err, dbres) => {
             console.log(err)
             console.log(dbres)
-            res.json(dbres.rows[0])
+            res.json(dbres.rows[0]) 
         })
     })
 })
@@ -66,51 +69,54 @@ app.post('/reg', (req, res) => {        // loads new reg to database +check if u
     console.log(req.body);
     let body = req.body;
     let userCheck = `SELECT * FROM account WHERE username = '${body.username}';`;
-    pool.query(userCheck, (error, result) => {
+    client.query(userCheck, (error, result) => {
       if (result.rows.length > 0) {
-        res.render('pages/home', { 'props': { regFailed: true } });
+        res.json('pages/home', { 'props': { regFailed: true } });
         return;
       }
-      var getUsersQuery = `INSERT INTO users (username , password) VALUES ('${body.username}' , '${body.password}');`;
+      var getUsersQuery = `INSERT INTO account (username , password) VALUES ('${body.username}' , '${body.password}');`;
       console.log(getUsersQuery);
-      pool.query(getUsersQuery, (error, result) => {
+      client.query(getUsersQuery, (error, result) => {
         if (error) {
           res.send("error");
           console.log(error);
         }
       });
       console.log("passed User Query\n");
-      pool.query(getStatsQuery, (error, result) => {
+      client.query(getStatsQuery, (error, result) => {
         if (error) {
           res.send("error");
           console.log(error);
         }
       });
-      res.render("pages/home", { props: { 'login': true } });
+      res.json("pages/home", { props: { 'login': true } });
     });
   })
 
   app.get("/home", (req, res) => {
-    res.render("pages/home", { "props": { loginFailed: false } })
+    res.json("pages/home", { "props": { loginFailed: false } })
   })
-
-
-
   app.post("/pages/login", (req, res) => {
     //console.log(req.body);
       var queryString = `SELECT * FROM account WHERE username='${req.body.username}';`;
-      pool.query(queryString, (error, result) => {
+      client.query(queryString, (error, result) => {
           if(error)
               res.send(error);
           if(result.rows.length > 0 && result.rows[0].password === req.body.password){
 
-            res.render("pages/play", {'props': {username: req.body.username}});    // load user page for users
+            res.json("pages/play", {'props': {username: req.body.username}});    // load user page for users
             return;
-
           }
-          res.render('pages/home', {'props': {loginFailed: true}});
+          res.json('pages/home', {'props': {loginFailed: true}});
       })
 
   })
 
-module.exports = app;
+  app.post("/input", (req,res) => {
+
+  })
+  app.get("/output", (req,res) => {
+
+  })
+module.exports = app;   
+

@@ -1,5 +1,14 @@
 var express = require('express');
 var router = express.Router();
+const {Client} = require("pg");
+const databaseclient = new Client({
+    host:process.env.PGHOST,
+    user:process.env.PGUSER,
+    port:process.env.PGPORT,
+    password:process.env.PGPASSWORD,
+    database:process.env.PGDATABASE,
+    ssl: true
+});
 
 const { getAudioDurationInSeconds } = require('get-audio-duration')
 const fillerWords = ['um', 'uh', 'er', 'ah', 'like', 'okay', 'right', 'you know', 'basically', 'i mean', 'so', 'totally', 'just'];
@@ -11,6 +20,11 @@ const ignore = ['to', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'from', 'abou
 router.get('/', function(req, res, next) {
   speechToText().then(transcript => {
     res.send(transcript);
+    client.connect().then(()=> {
+    client.query("SELECT * FROM account;", (err, dbres) => {
+      res.json(dbres.rows[0]) 
+    })
+  })
   }).catch(console.error);
 });
 
