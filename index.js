@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
         client.query("SELECT * FROM account;", (err, dbres) => {
             console.log(err)
             console.log(dbres)
-            res.send(dbres.rows[0])        
+            res.json(dbres.rows[0])        
         })
     })
 })
