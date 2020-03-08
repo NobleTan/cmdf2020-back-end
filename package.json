@@ -14,7 +14,7 @@
   },
   "homepage": "https://github.com/NobleTan/cmdf2020-back-end#readme",
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node index.js"
   },
   "dependencies": {
     "express": "^4.17.1",
