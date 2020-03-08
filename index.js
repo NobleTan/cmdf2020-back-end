@@ -2,10 +2,23 @@ const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000
 const {Client} = require("pg");
-const client = new Client();
+const client = new Client({
+    host:process.env.PGHOST,
+    user:process.env.PGUSER,
+    port:process.env.PGPORT,
+    password:process.env.PGPASSWORD,
+    database:process.env.PGDATABASE,
+    ssl: true
+});
+
 app.get("/", (req, res) => {
-    client.query("SELECT * FROM account", (err, dbres) => {
-        res.send(dbres.row[0])        
+    console.log("hello")
+    client.connect().then(()=> {
+        client.query("SELECT * FROM account;", (err, dbres) => {
+            console.log(err)
+            console.log(dbres)
+            res.send(dbres.rows[0])        
+        })
     })
 })
 
