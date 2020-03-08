@@ -21,8 +21,29 @@ router.get('/', function(req, res, next) {
   speechToText().then(transcript => {
     res.send(transcript);
     client.connect().then(()=> {
-    client.query("SELECT * FROM account;", (err, dbres) => {
-      res.json(dbres.rows[0]) 
+      let userCheck = `SELECT * FROM account WHERE username = '${body.username}';`;
+      client.query(userCheck, (error, dbres) => {
+        if (result.rows.length > 0) {
+          res.json('pages/home', { 'props': { regFailed: true } });
+          return;
+        }
+        var getUsersQuery = `INSERT INTO account (text) VALUES ('${body.text}');`;
+        console.log(getUsersQuery);
+        client.query(getUsersQuery, (error, dbres) => {
+          if (error) {
+            res.send("error");
+            console.log(error);
+          }
+        });
+        console.log("passed User Query\n");
+        client.query(getStatsQuery, (error, dbres) => {
+          if (error) {
+            res.send("error");
+            console.log(error);
+          }
+        });
+        res.json(dbres.rows[0]);
+   
     })
   })
   }).catch(console.error);
@@ -32,6 +53,32 @@ router.get('/mostFrequent', function(req, res, next) {
   speechToText().then(transcript => {
     let mostFrequent = getMostFrequent(transcript);
     res.send(mostFrequent);
+    client.connect().then(()=> {
+      let userCheck = `SELECT * FROM account WHERE username = '${body.username}';`;
+      client.query(userCheck, (error, dbres) => {
+        if (result.rows.length > 0) {
+          res.json('pages/results', { 'props': { failed: true } });
+          return;
+        }
+        var getUsersQuery = `INSERT INTO account (common1, common2, common3) VALUES ('${body.getMostFrequent[0]}','${body.getMostFrequent[1]}','${body.getMostFrequent[3]}');`;
+        console.log(getUsersQuery);
+        client.query(getUsersQuery, (error, result) => {
+          if (error) {
+            res.send("error");
+            console.log(error);
+          }
+        });
+        console.log("passed User Query\n");
+        client.query(getStatsQuery, (error, result) => {
+          if (error) {
+            res.send("error");
+            console.log(error);
+          }
+        });
+        res.json("pages/results", { props: { 'common': true } });
+   
+    })
+  })
   }).catch(console.error);
 });
 
@@ -39,6 +86,32 @@ router.get('/filler', function(req, res, next) {
   speechToText().then(transcript => {
     let fillerMap = wordCount(transcript, true);
     // sort and output top three
+    client.connect().then(()=> {
+      let userCheck = `SELECT * FROM account WHERE username = '${body.username}';`;
+      client.query(userCheck, (error, dbres) => {
+        if (result.rows.length > 0) {
+          res.json('pages/results', { 'props': { failed: true } });
+          return;
+        }
+        var getUsersQuery = `INSERT INTO account (filler1, filler2, filler3) VALUES ('${body.fillerMap[0]}','${body.fillerMap[1]}','${body.fillerMap[3]}');`;
+        console.log(getUsersQuery);
+        client.query(getUsersQuery, (error, result) => {
+          if (error) {
+            res.send("error");
+            console.log(error);
+          }
+        });
+        console.log("passed User Query\n");
+        client.query(getStatsQuery, (error, result) => {
+          if (error) {
+            res.send("error");
+            console.log(error);
+          }
+        });
+        res.json("pages/results", { props: { 'filler': true } });
+   
+    })
+  })
     res.send(fillerMap);
   }).catch(console.error);
 })
@@ -50,6 +123,32 @@ router.get('/wpm', function(req, res, next) {
     getAudioDurationInSeconds(file).then((seconds) => {
       const totalWords = transcript.split(' ').length;
       const wpm = totalWords/(seconds/60);
+      client.connect().then(()=> {
+        let userCheck = `SELECT * FROM account WHERE username = '${body.username}';`;
+        client.query(userCheck, (error, dbres) => {
+          if (result.rows.length > 0) {
+            res.json('pages/results', { 'props': { failed: true } });
+            return;
+          }
+          var getUsersQuery = `INSERT INTO account (words) VALUES ('${body.wps}');`;
+          console.log(getUsersQuery);
+          client.query(getUsersQuery, (error, result) => {
+            if (error) {
+              res.send("error");
+              console.log(error);
+            }
+          });
+          console.log("passed User Query\n");
+          client.query(getStatsQuery, (error, result) => {
+            if (error) {
+              res.send("error");
+              console.log(error);
+            }
+          });
+          res.json("pages/results", { props: { 'wpm': true } });
+     
+      })
+  })
       res.send(wpm.toString());
     }).catch(console.error);
   })
@@ -59,6 +158,33 @@ router.get('/wpm', function(req, res, next) {
 router.get('/duration', function(req, res, next) {
   const file = req.body.file;
   getAudioDurationInSeconds(file).then((duration) => {
+    const timeduration = Math.ceil(duration).toString()
+    client.connect().then(()=> {
+      let userCheck = `SELECT * FROM account WHERE username = '${body.username}';`;
+      client.query(userCheck, (error, dbres) => {
+        if (result.rows.length > 0) {
+          res.json('pages/results', { 'props': { failed: true } });
+          return;
+        }
+        var getUsersQuery = `INSERT INTO account (time) VALUES ('${body.timeduration}');`;
+        console.log(getUsersQuery);
+        client.query(getUsersQuery, (error, result) => {
+          if (error) {
+            res.send("error");
+            console.log(error);
+          }
+        });
+        console.log("passed User Query\n");
+        client.query(getStatsQuery, (error, result) => {
+          if (error) {
+            res.send("error");
+            console.log(error);
+          }
+        });
+        res.json("pages/results", { props: { 'time': true } });
+   
+    })
+  })
     res.send(Math.ceil(duration).toString());
   }).catch(console.error);
 });

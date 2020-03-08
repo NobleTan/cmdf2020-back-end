@@ -69,21 +69,21 @@ app.post('/reg', (req, res) => {        // loads new reg to database +check if u
     console.log(req.body);
     let body = req.body;
     let userCheck = `SELECT * FROM account WHERE username = '${body.username}';`;
-    client.query(userCheck, (error, result) => {
+    client.query(userCheck, (error, dbres) => {
       if (result.rows.length > 0) {
         res.json('pages/home', { 'props': { regFailed: true } });
         return;
       }
       var getUsersQuery = `INSERT INTO account (username , password) VALUES ('${body.username}' , '${body.password}');`;
       console.log(getUsersQuery);
-      client.query(getUsersQuery, (error, result) => {
+      client.query(getUsersQuery, (error, dbres) => {
         if (error) {
           res.send("error");
           console.log(error);
         }
       });
       console.log("passed User Query\n");
-      client.query(getStatsQuery, (error, result) => {
+      client.query(getStatsQuery, (error, dbres) => {
         if (error) {
           res.send("error");
           console.log(error);
@@ -99,7 +99,7 @@ app.post('/reg', (req, res) => {        // loads new reg to database +check if u
   app.post("/pages/login", (req, res) => {
     //console.log(req.body);
       var queryString = `SELECT * FROM account WHERE username='${req.body.username}';`;
-      client.query(queryString, (error, result) => {
+      client.query(queryString, (error, dbres) => {
           if(error)
               res.send(error);
           if(result.rows.length > 0 && result.rows[0].password === req.body.password){
@@ -112,11 +112,5 @@ app.post('/reg', (req, res) => {        // loads new reg to database +check if u
 
   })
 
-  app.post("/input", (req,res) => {
-
-  })
-  app.get("/output", (req,res) => {
-
-  })
 module.exports = app;   
 
